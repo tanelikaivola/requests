@@ -496,6 +496,17 @@ class Response(object):
         #: and the arrival of the response (as a timedelta)
         self.elapsed = datetime.timedelta(0)
 
+    def __getstate__(self):
+        # consume everything
+        if not self._content_consumed:
+            self.content
+        attrs = (attr for attr in self.__dict__.keys() if attr != 'raw')
+        return dict((attr, getattr(self, attr, None)) for attr in attrs)
+
+    def __setstate__(self, state):
+        for name, value in state.items():
+            setattr(self, name, value)
+
     def __repr__(self):
         return '<Response [%s]>' % (self.status_code)
 
